@@ -4,9 +4,12 @@ let socket = null;
 
 export const initSocket = () => {
   if (!socket) {
-    socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
-      transports: ['websocket'],
-    });
+    const url = import.meta.env.VITE_SOCKET_URL;
+    if (!url) {
+      console.error('VITE_SOCKET_URL is not set. Socket.IO will not connect.');
+      return { emit: () => {}, on: () => {}, off: () => {} }; // no-op stub
+    }
+    socket = io(url, { transports: ['websocket'] });
   }
   return socket;
 };
