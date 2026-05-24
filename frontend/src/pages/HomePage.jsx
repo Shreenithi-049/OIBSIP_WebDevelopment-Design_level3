@@ -112,9 +112,16 @@ const HomePage = () => {
 
         const res = await api.get('/pizzas', { params });
 
-        console.log('Pizza API Response:', res.data);
+        console.log('FULL RESPONSE:', res);
 
-        setPizzas(res.data.pizzas || []);
+        const pizzaData =
+          res?.data?.pizzas ||
+          res?.pizzas ||
+          [];
+
+        console.log('FINAL PIZZA DATA:', pizzaData);
+
+        setPizzas(pizzaData);
       } catch (err) {
         console.error('Pizza Fetch Error:', err);
       } finally {
