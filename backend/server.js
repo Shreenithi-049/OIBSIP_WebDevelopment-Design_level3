@@ -23,9 +23,18 @@ initSocket(server);
 // Start cron jobs
 startLowStockCron();
 
-// Middleware
+// CORS — allow both local dev and deployed frontend
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173',
+  'http://localhost:3000',
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 

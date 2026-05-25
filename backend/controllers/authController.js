@@ -11,35 +11,41 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Email already registered' });
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const user = await User.create({ name, email, password, verificationToken });
+    const verificationTokenExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Try sending verification email — non-fatal if email not configured
+    const user = await User.create({ name, email, password, verificationToken, verificationTokenExpire });
+
+    const url = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
     try {
-      const url = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
       await sendEmail({ to: email, subject: 'Verify your PizzaHub account', html: verificationEmailTemplate(name, url) });
-      res.status(201).json({ success: true, message: 'Registration successful! Check your email to verify.' });
     } catch (emailErr) {
-      console.warn('Email sending failed (check EMAIL config):', emailErr.message);
-      // Auto-verify if email is not configured so dev/test can still login
-      user.isVerified = true;
-      user.verificationToken = undefined;
-      await user.save();
-      res.status(201).json({ success: true, message: 'Registration successful! You can now login.' });
+      console.error('SMTP Error during registration:', emailErr.message);
+      await User.findByIdAndDelete(user._id);
+      return res.status(500).json({ success: false, message: 'Failed to send verification email. Check your email config.' });
     }
+
+    res.status(201).json({ success: true, message: 'Registration successful! Check your email to verify your account.' });
   } catch (err) { next(err); }
 };
 
-// @POST /api/auth/verify-email/:token
+// @GET /api/auth/verify-email/:token
 exports.verifyEmail = async (req, res, next) => {
   try {
-    const user = await User.findOne({ verificationToken: req.params.token });
-    if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+    const user = await User.findOne({
+      verificationToken: req.params.token,
+      verificationTokenExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.redirect(`${process.env.CLIENT_URL}/verify-email/failed`);
+    }
 
     user.isVerified = true;
     user.verificationToken = undefined;
+    user.verificationTokenExpire = undefined;
     await user.save();
 
-    res.json({ success: true, message: 'Email verified! You can now login.' });
+    res.redirect(`${process.env.CLIENT_URL}/verify-email/success`);
   } catch (err) { next(err); }
 };
 
@@ -51,7 +57,7 @@ exports.login = async (req, res, next) => {
     if (!user || !(await user.matchPassword(password)))
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     if (!user.isVerified)
-      return res.status(401).json({ success: false, message: 'Please verify your email first' });
+      return res.status(403).json({ success: false, message: 'Please verify your email before logging in', notVerified: true });
 
     res.json({
       success: true,
