@@ -10,6 +10,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+console.log('BREVO_USER:', process.env.BREVO_USER);
+console.log('BREVO_PASS length:', process.env.BREVO_PASS ? process.env.BREVO_PASS.length : 'NOT SET');
+
 const verifyTimeout = setTimeout(() => {
   console.error('SMTP verify timed out');
 }, 10000);
