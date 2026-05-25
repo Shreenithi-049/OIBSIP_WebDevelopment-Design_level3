@@ -1,23 +1,17 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  host: process.env.BREVO_HOST || 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS,
   },
 });
 
-// Verify SMTP on startup
-console.log('EMAIL_USER:', process.env.EMAIL_USER);
-console.log('EMAIL_PASS length:', process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 'NOT SET');
-console.log('EMAIL_HOST:', process.env.EMAIL_HOST);
-console.log('EMAIL_PORT:', process.env.EMAIL_PORT);
-
 const verifyTimeout = setTimeout(() => {
-  console.error('SMTP verify timed out — port 465 may also be blocked on Render');
+  console.error('SMTP verify timed out');
 }, 10000);
 
 transporter.verify((err) => {
@@ -28,7 +22,7 @@ transporter.verify((err) => {
 
 exports.sendEmail = async ({ to, subject, html }) => {
   await transporter.sendMail({
-    from: `"PizzaHub 🍕" <${process.env.EMAIL_USER}>`,
+    from: `"PizzaHub 🍕" <${process.env.BREVO_USER}>`,
     to,
     subject,
     html,
