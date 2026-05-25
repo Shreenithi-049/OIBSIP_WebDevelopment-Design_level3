@@ -12,8 +12,13 @@ const transporter = nodemailer.createTransport({
 });
 
 // Verify SMTP on startup
+console.log('EMAIL_USER:', process.env.EMAIL_USER);
+console.log('EMAIL_PASS length:', process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 'NOT SET');
+console.log('EMAIL_HOST:', process.env.EMAIL_HOST);
+console.log('EMAIL_PORT:', process.env.EMAIL_PORT);
+
 transporter.verify((err) => {
-  if (err) console.error('SMTP connection failed:', err.message);
+  if (err) console.error('SMTP connection failed:', err.message, err.code);
   else console.log('SMTP ready to send emails ✅');
 });
 
