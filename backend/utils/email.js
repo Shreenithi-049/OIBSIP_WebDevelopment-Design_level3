@@ -16,7 +16,12 @@ console.log('EMAIL_PASS length:', process.env.EMAIL_PASS ? process.env.EMAIL_PAS
 console.log('EMAIL_HOST:', process.env.EMAIL_HOST);
 console.log('EMAIL_PORT:', process.env.EMAIL_PORT);
 
+const verifyTimeout = setTimeout(() => {
+  console.error('SMTP verify timed out — port 465 may also be blocked on Render');
+}, 10000);
+
 transporter.verify((err) => {
+  clearTimeout(verifyTimeout);
   if (err) console.error('SMTP connection failed:', err.message, err.code);
   else console.log('SMTP ready to send emails ✅');
 });
