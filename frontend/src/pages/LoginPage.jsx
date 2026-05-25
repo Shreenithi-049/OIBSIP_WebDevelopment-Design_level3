@@ -7,6 +7,7 @@ import Spinner from '../components/common/Spinner';
 
 const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
+  const [unverified, setUnverified] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading } = useSelector((s) => s.auth);
@@ -17,6 +18,8 @@ const LoginPage = () => {
     if (loginUser.fulfilled.match(result)) {
       const role = result.payload.user.role;
       navigate(role === 'admin' ? '/admin' : '/');
+    } else if (result.payload?.notVerified) {
+      setUnverified(true);
     }
   };
 
@@ -35,6 +38,11 @@ const LoginPage = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {unverified && (
+              <div className="p-3 bg-yellow-50 border border-yellow-300 rounded-lg text-sm text-yellow-800">
+                ⚠️ Please verify your email before logging in. Check your inbox for the verification link.
+              </div>
+            )}
             <div>
               <label className="block text-sm font-semibold text-app-text mb-1">Email</label>
               <input

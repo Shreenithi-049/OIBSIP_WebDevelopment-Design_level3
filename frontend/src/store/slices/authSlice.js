@@ -8,7 +8,8 @@ export const loginUser = createAsyncThunk('auth/login', async (data, { rejectWit
     localStorage.setItem('token', res.data.token);
     return res.data;
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Login failed');
+    const errData = err.response?.data;
+    return rejectWithValue(errData || { message: 'Login failed' });
   }
 });
 
@@ -61,8 +62,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
-        toast.error(action.payload);
+        state.error = action.payload?.message || action.payload;
+        toast.error(action.payload?.message || action.payload);
       })
       .addCase(registerUser.pending, (state) => { state.loading = true; })
       .addCase(registerUser.fulfilled, (state) => {

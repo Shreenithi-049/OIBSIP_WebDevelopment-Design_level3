@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../services/api';
@@ -96,7 +96,9 @@ export const VerifyEmailPage = () => {
   const { token } = useParams();
   const [status, setStatus] = useState('verifying');
 
-  useState(() => {
+  useEffect(() => {
+    if (token === 'success') { setStatus('success'); return; }
+    if (token === 'failed') { setStatus('error'); return; }
     api.get(`/auth/verify-email/${token}`)
       .then(() => setStatus('success'))
       .catch(() => setStatus('error'));
@@ -105,12 +107,12 @@ export const VerifyEmailPage = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="card p-10 text-center max-w-md">
-        {status === 'verifying' && <><div className="text-6xl mb-4">⏳</div><p>Verifying your email...</p></>}
+        {status === 'verifying' && <><div className="text-6xl mb-4">⏳</div><p className="text-app-text">Verifying your email...</p></>}
         {status === 'success' && (
           <>
             <div className="text-6xl mb-4">✅</div>
             <h2 className="text-2xl font-bold text-app-text mb-2">Email Verified!</h2>
-            <p className="text-gray-500 mb-6">You can now login to your account.</p>
+            <p className="text-gray-500 mb-6">Your account is now active. You can log in.</p>
             <Link to="/login" className="btn-primary inline-block">Go to Login</Link>
           </>
         )}
@@ -118,7 +120,7 @@ export const VerifyEmailPage = () => {
           <>
             <div className="text-6xl mb-4">❌</div>
             <h2 className="text-2xl font-bold text-secondary mb-2">Verification Failed</h2>
-            <p className="text-gray-500 mb-6">Invalid or expired link.</p>
+            <p className="text-gray-500 mb-6">This link is invalid or has expired (links expire after 24 hours).</p>
             <Link to="/register" className="btn-primary inline-block">Register Again</Link>
           </>
         )}
