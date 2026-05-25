@@ -1,9 +1,13 @@
 const nodemailer = require('nodemailer');
 
+// ===============================
+// Brevo SMTP Transport
+// ===============================
 const transporter = nodemailer.createTransport({
-  host: process.env.BREVO_HOST || 'smtp-relay.brevo.com',
+  host: 'smtp-relay.brevo.com',
 
-  // Use 2525 instead of 587 to avoid Render SMTP timeout
+  // IMPORTANT:
+  // Render free tier works better with 2525
   port: 2525,
 
   secure: false,
@@ -13,153 +17,259 @@ const transporter = nodemailer.createTransport({
     pass: process.env.BREVO_PASS,
   },
 
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+  tls: {
+    rejectUnauthorized: false,
+  },
+
+  connectionTimeout: 20000,
+  greetingTimeout: 20000,
+  socketTimeout: 20000,
 });
 
+// ===============================
 // Debug Logs
+// ===============================
 console.log('BREVO_USER:', process.env.BREVO_USER);
+
 console.log(
-  'BREVO_PASS length:',
-  process.env.BREVO_PASS
-    ? process.env.BREVO_PASS.length
-    : 'NOT SET'
+  'BREVO_PASS exists:',
+  process.env.BREVO_PASS ? 'YES' : 'NO'
 );
 
+// ===============================
 // Verify SMTP Connection
-transporter.verify((err) => {
+// ===============================
+transporter.verify((err, success) => {
   if (err) {
-    console.error(
-      'SMTP connection failed:',
-      err.message,
-      err.code
-    );
+    console.error('SMTP ERROR:', err);
   } else {
-    console.log('SMTP ready to send emails ✅');
+    console.log('SMTP READY ✅');
   }
 });
 
-// Send Email Function
-exports.sendEmail = async ({ to, subject, html }) => {
-  await transporter.sendMail({
-    from: `"PizzaHub 🍕" <${process.env.BREVO_USER}>`,
-    to,
-    subject,
-    html,
-  });
+// ===============================
+// Generic Send Email Function
+// ===============================
+exports.sendEmail = async ({
+  to,
+  subject,
+  html,
+}) => {
+  try {
+    const info = await transporter.sendMail({
+      from: `"PizzaHub 🍕" <${process.env.BREVO_USER}>`,
+      to,
+      subject,
+      html,
+    });
+
+    console.log('Email sent:', info.messageId);
+
+    return info;
+  } catch (error) {
+    console.error('Email sending failed:', error);
+
+    throw error;
+  }
 };
 
+// ===============================
 // Verification Email Template
-exports.verificationEmailTemplate = (name, url) => `
-  <div style="
-    font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: auto;
-    background: #FAF3E0;
-    padding: 30px;
-    border-radius: 12px;
+// ===============================
+exports.verificationEmailTemplate = (
+  name,
+  verificationUrl
+) => `
+<div style="
+  font-family: Arial, sans-serif;
+  background: #FAF3E0;
+  padding: 40px;
+  max-width: 600px;
+  margin: auto;
+  border-radius: 14px;
+">
+
+  <h1 style="
+    color: #2A9D8F;
+    text-align: center;
   ">
-    <h2 style="color:#2A9D8F">
-      Welcome to PizzaHub, ${name}! 🍕
-    </h2>
+    Welcome to PizzaHub 🍕
+  </h1>
 
-    <p style="color:#264653">
-      Please verify your email to start ordering delicious pizzas.
-    </p>
+  <p style="
+    color: #264653;
+    font-size: 16px;
+    line-height: 1.6;
+  ">
+    Hi <b>${name}</b>,
+  </p>
 
+  <p style="
+    color: #264653;
+    font-size: 16px;
+    line-height: 1.6;
+  ">
+    Thank you for signing up at PizzaHub.
+    Please verify your email address to start
+    ordering delicious pizzas.
+  </p>
+
+  <div style="text-align:center;margin:35px 0;">
     <a
-      href="${url}"
+      href="${verificationUrl}"
       style="
         background:#E63946;
         color:white;
-        padding:12px 24px;
-        border-radius:8px;
+        padding:14px 28px;
         text-decoration:none;
+        border-radius:8px;
+        font-size:16px;
+        font-weight:bold;
         display:inline-block;
-        margin:16px 0;
       "
     >
       Verify Email
     </a>
-
-    <p style="color:#888;font-size:12px">
-      Link expires in 24 hours.
-    </p>
   </div>
+
+  <p style="
+    color:#666;
+    font-size:14px;
+    line-height:1.5;
+  ">
+    This verification link will expire in 24 hours.
+  </p>
+
+  <p style="
+    color:#999;
+    font-size:12px;
+    margin-top:30px;
+  ">
+    If you didn't create this account,
+    you can safely ignore this email.
+  </p>
+
+</div>
 `;
 
+// ===============================
 // Reset Password Template
-exports.resetPasswordTemplate = (name, url) => `
-  <div style="
-    font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: auto;
-    background: #FAF3E0;
-    padding: 30px;
-    border-radius: 12px;
+// ===============================
+exports.resetPasswordTemplate = (
+  name,
+  resetUrl
+) => `
+<div style="
+  font-family: Arial, sans-serif;
+  background: #FAF3E0;
+  padding: 40px;
+  max-width: 600px;
+  margin: auto;
+  border-radius: 14px;
+">
+
+  <h1 style="
+    color: #E63946;
+    text-align: center;
   ">
-    <h2 style="color:#2A9D8F">
-      Password Reset Request
-    </h2>
+    Reset Your Password 🔒
+  </h1>
 
-    <p style="color:#264653">
-      Hi ${name}, click below to reset your password.
-    </p>
+  <p style="
+    color: #264653;
+    font-size: 16px;
+    line-height: 1.6;
+  ">
+    Hi <b>${name}</b>,
+  </p>
 
+  <p style="
+    color: #264653;
+    font-size: 16px;
+    line-height: 1.6;
+  ">
+    We received a request to reset your password.
+  </p>
+
+  <div style="text-align:center;margin:35px 0;">
     <a
-      href="${url}"
+      href="${resetUrl}"
       style="
-        background:#E63946;
+        background:#2A9D8F;
         color:white;
-        padding:12px 24px;
-        border-radius:8px;
+        padding:14px 28px;
         text-decoration:none;
+        border-radius:8px;
+        font-size:16px;
+        font-weight:bold;
         display:inline-block;
-        margin:16px 0;
       "
     >
       Reset Password
     </a>
-
-    <p style="color:#888;font-size:12px">
-      Link expires in 1 hour. Ignore if not requested.
-    </p>
   </div>
+
+  <p style="
+    color:#666;
+    font-size:14px;
+  ">
+    This reset link will expire in 1 hour.
+  </p>
+
+</div>
 `;
 
-// Low Stock Template
+// ===============================
+// Low Stock Alert Template
+// ===============================
 exports.lowStockTemplate = (items) => `
-  <div style="
-    font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: auto;
-    background: #FAF3E0;
-    padding: 30px;
-    border-radius: 12px;
+<div style="
+  font-family: Arial, sans-serif;
+  background: #FAF3E0;
+  padding: 40px;
+  max-width: 600px;
+  margin: auto;
+  border-radius: 14px;
+">
+
+  <h1 style="
+    color:#E63946;
+    text-align:center;
   ">
-    <h2 style="color:#E63946">
-      ⚠️ Low Stock Alert
-    </h2>
+    ⚠️ Low Stock Alert
+  </h1>
 
-    <p style="color:#264653">
-      The following items are running low:
-    </p>
+  <p style="
+    color:#264653;
+    font-size:16px;
+  ">
+    The following inventory items are running low:
+  </p>
 
-    <ul>
-      ${items
-        .map(
-          (i) => `
-            <li style="color:#264653">
-              <b>${i.name}</b> — ${i.quantity} ${i.unit} remaining
-            </li>
-          `
-        )
-        .join('')}
-    </ul>
+  <ul style="
+    color:#264653;
+    font-size:15px;
+    line-height:1.8;
+  ">
+    ${items
+      .map(
+        (item) => `
+      <li>
+        <b>${item.name}</b> —
+        ${item.quantity} ${item.unit} remaining
+      </li>
+    `
+      )
+      .join('')}
+  </ul>
 
-    <p style="color:#888;font-size:12px">
-      Please restock soon to avoid order disruptions.
-    </p>
-  </div>
+  <p style="
+    color:#888;
+    font-size:13px;
+    margin-top:30px;
+  ">
+    Please restock inventory soon.
+  </p>
+
+</div>
 `;
