@@ -216,25 +216,6 @@ const LoginPage = () => {
             </motion.button>
           </form>
 
-          {/* DEMO ACCOUNTS */}
-          <div className="mt-6 p-4 bg-primary/5 rounded-xl text-sm text-gray-600">
-            <p className="font-semibold mb-2 text-app-text">
-              Demo Credentials
-            </p>
-
-            <p>
-              👤 User:
-              user@pizzahub.com /
-              User@123
-            </p>
-
-            <p className="mt-1">
-              🔑 Admin:
-              admin@pizzahub.com /
-              Admin@123
-            </p>
-          </div>
-
           {/* REGISTER LINK */}
           <p className="text-center mt-6 text-gray-500 text-sm">
             Don&apos;t have an

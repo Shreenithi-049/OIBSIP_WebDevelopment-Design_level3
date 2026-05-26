@@ -10,7 +10,8 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -69,22 +70,23 @@ const Navbar = () => {
             {token ? (
               <div className="relative">
                 <button
-                  onClick={() => setMenuOpen(!menuOpen)}
+                  onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 px-3 py-2 rounded-xl transition-colors"
                 >
                   <span className="text-lg">👤</span>
                   <span className="text-sm font-semibold text-app-text hidden sm:block">{user?.name?.split(' ')[0]}</span>
                 </button>
                 <AnimatePresence>
-                  {menuOpen && (
+                  {profileOpen && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.15 }}
                       className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
                     >
-                      <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-gray-50 text-app-text" onClick={() => setMenuOpen(false)}>👤 Profile</Link>
-                      {user?.role !== 'admin' && <Link to="/orders" className="block px-4 py-2 text-sm hover:bg-gray-50 text-app-text" onClick={() => setMenuOpen(false)}>📦 My Orders</Link>}
+                      <Link to="/profile" className="block px-4 py-2 text-sm hover:bg-gray-50 text-app-text" onClick={() => setProfileOpen(false)}>👤 Profile</Link>
+                      {user?.role !== 'admin' && <Link to="/orders" className="block px-4 py-2 text-sm hover:bg-gray-50 text-app-text" onClick={() => setProfileOpen(false)}>📦 My Orders</Link>}
                       <hr className="my-1" />
                       <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-red-50">🚪 Logout</button>
                     </motion.div>
@@ -96,7 +98,7 @@ const Navbar = () => {
             )}
 
             {/* Mobile menu button */}
-            <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
+            <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
               <div className="w-5 h-0.5 bg-app-text mb-1" />
               <div className="w-5 h-0.5 bg-app-text mb-1" />
               <div className="w-5 h-0.5 bg-app-text" />
@@ -106,7 +108,7 @@ const Navbar = () => {
 
         {/* Mobile Nav */}
         <AnimatePresence>
-          {menuOpen && (
+          {mobileOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -118,7 +120,7 @@ const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   className="block py-2 text-app-text hover:text-primary font-medium"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => setMobileOpen(false)}
                 >
                   {link.label}
                 </Link>
