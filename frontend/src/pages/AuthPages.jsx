@@ -263,32 +263,12 @@ export const VerifyEmailPage = () => {
     useState('verifying');
 
   useEffect(() => {
-    // Success Route
-    if (token === 'success') {
-      setStatus('success');
-      return;
-    }
-
-    // Failed Route
-    if (token === 'failed') {
-      setStatus('error');
-      return;
-    }
-
-    // Verify Token
     const verifyEmail = async () => {
       try {
-        await api.get(
-          `/auth/verify-email/${token}`
-        );
-
+        await api.get(`/auth/verify-email/${token}`);
         setStatus('success');
       } catch (err) {
-        console.error(
-          'Verification failed:',
-          err
-        );
-
+        console.error('Verification failed:', err);
         setStatus('error');
       }
     };

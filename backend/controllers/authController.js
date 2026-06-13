@@ -47,9 +47,8 @@ exports.register = async (req, res, next) => {
       verificationTokenExpire,
     });
 
-    // Verification URL
-    const verifyUrl =
-  `${process.env.BACKEND_URL}/api/auth/verify-email/${verificationToken}`;
+    // Verification URL — points to frontend, which calls the API
+    const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
     // Send verification email
     try {
       await sendEmail({
@@ -98,31 +97,25 @@ exports.verifyEmail = async (req, res, next) => {
 
     const user = await User.findOne({
       verificationToken: token,
-
-      verificationTokenExpire: {
-        $gt: Date.now(),
-      },
+      verificationTokenExpire: { $gt: Date.now() },
     });
 
-    // Invalid token
     if (!user) {
-      return res.redirect(
-        `${process.env.CLIENT_URL}/verify-email/failed`
-      );
+      return res.status(400).json({
+        success: false,
+        message: 'Verification link is invalid or has expired.',
+      });
     }
 
-    // Verify account
     user.isVerified = true;
-
     user.verificationToken = undefined;
     user.verificationTokenExpire = undefined;
-
     await user.save();
 
-    // Redirect success page
-    res.redirect(
-      `${process.env.CLIENT_URL}/verify-email/success`
-    );
+    res.json({
+      success: true,
+      message: 'Email verified successfully. You can now log in.',
+    });
   } catch (err) {
     next(err);
   }
@@ -287,6 +280,41 @@ exports.resetPassword = async (
       success: true,
       message: 'Password reset successful',
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ======================================================
+// @POST /api/auth/resend-verification
+// ======================================================
+exports.resendVerification = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No account found with this email.' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ success: false, message: 'This account is already verified.' });
+    }
+
+    // Generate fresh token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Verify Your PizzaHub Account 🍕',
+      html: verificationEmailTemplate(user.name, verifyUrl),
+    });
+
+    res.json({ success: true, message: 'Verification email resent. Check your inbox.' });
   } catch (err) {
     next(err);
   }

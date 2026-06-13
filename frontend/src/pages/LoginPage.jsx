@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
 import { useDispatch, useSelector } from 'react-redux';
-
 import { motion } from 'framer-motion';
-
 import toast from 'react-hot-toast';
-
 import { loginUser } from '../store/slices/authSlice';
-
 import Spinner from '../components/common/Spinner';
+import api from '../services/api';
 
 const LoginPage = () => {
   const [form, setForm] = useState({
@@ -17,8 +13,20 @@ const LoginPage = () => {
     password: '',
   });
 
-  const [unverified, setUnverified] =
-    useState(false);
+  const [unverified, setUnverified] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    try {
+      await api.post('/auth/resend-verification', { email: form.email });
+      toast.success('Verification email sent! Check your inbox.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to resend email.');
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const dispatch = useDispatch();
 
@@ -127,18 +135,16 @@ const LoginPage = () => {
                 }}
                 className="p-4 bg-yellow-50 border border-yellow-300 rounded-xl text-sm text-yellow-800"
               >
-                <p className="font-semibold mb-1">
-                  ⚠️ Email Not Verified
-                </p>
-
-                <p>
-                  Please verify your
-                  email before logging
-                  in. Check your inbox
-                  and spam folder for
-                  the verification
-                  email.
-                </p>
+                <p className="font-semibold mb-1">⚠️ Email Not Verified</p>
+                <p className="mb-3">Please verify your email before logging in. Check your inbox and spam folder.</p>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                  className="flex items-center gap-2 text-xs font-semibold text-yellow-800 bg-yellow-100 hover:bg-yellow-200 border border-yellow-400 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-60"
+                >
+                  {resendLoading ? <Spinner size="sm" color="yellow" /> : '📧 Resend Verification Email'}
+                </button>
               </motion.div>
             )}
 

@@ -58,7 +58,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        toast.success(`Welcome back, ${action.payload.user.name}! 🍕`);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
