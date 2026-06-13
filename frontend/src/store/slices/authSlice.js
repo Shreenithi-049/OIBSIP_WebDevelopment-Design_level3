@@ -67,7 +67,6 @@ const authSlice = createSlice({
       .addCase(registerUser.pending, (state) => { state.loading = true; })
       .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
-        toast.success('Registration successful! Check your email.');
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;

@@ -14,7 +14,8 @@ import { ProtectedRoute, AdminRoute, GuestRoute } from './components/common/Prot
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './pages/AuthPages';
+import { ForgotPasswordPage, ResetPasswordPage } from './pages/AuthPages';
+import VerifyOtpPage from './pages/VerifyOtpPage';
 import CartPage from './pages/CartPage';
 import CustomPizzaPage from './pages/CustomPizzaPage';
 import { OrderConfirmationPage, MyOrdersPage } from './pages/OrderPages';
@@ -53,7 +54,7 @@ const AppContent = () => {
             {/* Public */}
             <Route path="/" element={<HomePage />} />
             <Route path="/pizza/:id" element={<PizzaDetailPage />} />
-            <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
             <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
             {/* Guest only */}

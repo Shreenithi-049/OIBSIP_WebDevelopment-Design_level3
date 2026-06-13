@@ -74,81 +74,18 @@ exports.sendEmail = async ({
 };
 
 // ===============================
-// Verification Email Template
+// OTP Email Template
 // ===============================
-exports.verificationEmailTemplate = (
-  name,
-  verificationUrl
-) => `
-<div style="
-  font-family: Arial, sans-serif;
-  background: #FAF3E0;
-  padding: 40px;
-  max-width: 600px;
-  margin: auto;
-  border-radius: 14px;
-">
-
-  <h1 style="
-    color: #2A9D8F;
-    text-align: center;
-  ">
-    Welcome to PizzaHub 🍕
-  </h1>
-
-  <p style="
-    color: #264653;
-    font-size: 16px;
-    line-height: 1.6;
-  ">
-    Hi <b>${name}</b>,
-  </p>
-
-  <p style="
-    color: #264653;
-    font-size: 16px;
-    line-height: 1.6;
-  ">
-    Thank you for signing up at PizzaHub.
-    Please verify your email address to start
-    ordering delicious pizzas.
-  </p>
-
-  <div style="text-align:center;margin:35px 0;">
-    <a
-      href="${verificationUrl}"
-      style="
-        background:#E63946;
-        color:white;
-        padding:14px 28px;
-        text-decoration:none;
-        border-radius:8px;
-        font-size:16px;
-        font-weight:bold;
-        display:inline-block;
-      "
-    >
-      Verify Email
-    </a>
+exports.otpEmailTemplate = (name, otp) => `
+<div style="font-family:Arial,sans-serif;background:#FAF3E0;padding:40px;max-width:600px;margin:auto;border-radius:14px;">
+  <h1 style="color:#2A9D8F;text-align:center;">Welcome to PizzaHub 🍕</h1>
+  <p style="color:#264653;font-size:16px;line-height:1.6;">Hi <b>${name}</b>,</p>
+  <p style="color:#264653;font-size:16px;line-height:1.6;">Your email verification OTP is:</p>
+  <div style="text-align:center;margin:30px 0;">
+    <span style="font-size:42px;font-weight:bold;letter-spacing:12px;color:#E63946;background:#fff3f3;padding:16px 32px;border-radius:12px;border:2px dashed #E63946;display:inline-block;">${otp}</span>
   </div>
-
-  <p style="
-    color:#666;
-    font-size:14px;
-    line-height:1.5;
-  ">
-    This verification link will expire in 24 hours.
-  </p>
-
-  <p style="
-    color:#999;
-    font-size:12px;
-    margin-top:30px;
-  ">
-    If you didn't create this account,
-    you can safely ignore this email.
-  </p>
-
+  <p style="color:#666;font-size:14px;text-align:center;">This OTP expires in <b>10 minutes</b>. Do not share it with anyone.</p>
+  <p style="color:#999;font-size:12px;margin-top:30px;">If you didn’t create this account, you can safely ignore this email.</p>
 </div>
 `;
 
