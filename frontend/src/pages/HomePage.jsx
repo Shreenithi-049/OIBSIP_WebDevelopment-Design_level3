@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { CardSkeleton } from '../components/common/Spinner';
+import PizzaCard from '../components/common/PizzaCard';
 
 const categories = ['all', 'veg', 'non-veg', 'vegan'];
 
@@ -238,31 +239,8 @@ const HomePage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden p-4"
               >
-                <img
-                  src={pizza.image}
-                  alt={pizza.name}
-                  className="w-full h-48 object-cover rounded-xl mb-4"
-                />
-
-                <h3 className="text-xl font-bold text-app-text mb-2">
-                  {pizza.name}
-                </h3>
-
-                <p className="text-gray-500 text-sm mb-3">
-                  {pizza.description}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">
-                    ₹{pizza.basePrice}
-                  </span>
-
-                  <button className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-all">
-                    Add to Cart
-                  </button>
-                </div>
+                <PizzaCard pizza={pizza} />
               </motion.div>
             ))}
           </motion.div>
