@@ -62,11 +62,19 @@ app.get('/', (req, res) => {
   });
 });
 
-// TEST ROUTE
+// TEST ROUTE — remove after debugging
 app.get('/test', (req, res) => {
   res.json({
     success: true,
-    message: 'Backend updated successfully ✅'
+    message: 'Backend updated successfully ✅',
+    timestamp: new Date().toISOString(),
+    env_check: {
+      has_backend_url: !!process.env.BACKEND_URL,
+      has_client_url: !!process.env.CLIENT_URL,
+      backend_url: process.env.BACKEND_URL || 'NOT SET ❌',
+      client_url: process.env.CLIENT_URL || 'NOT SET ❌',
+      node_env: process.env.NODE_ENV
+    }
   });
 });
 
