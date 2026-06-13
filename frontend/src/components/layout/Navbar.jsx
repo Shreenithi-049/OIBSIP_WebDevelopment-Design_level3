@@ -24,7 +24,11 @@ const Navbar = () => {
     ? user?.role === 'admin'
       ? [{ to: '/admin', label: 'Dashboard' }, { to: '/admin/orders', label: 'Orders' }, { to: '/admin/inventory', label: 'Inventory' }]
       : [{ to: '/', label: 'Menu' }, { to: '/custom-pizza', label: 'Build Pizza' }, { to: '/orders', label: 'My Orders' }]
-    : [{ to: '/', label: 'Menu' }, { to: '/login', label: 'Login' }, { to: '/register', label: 'Register' }];
+    : [
+        { to: '/', label: 'Menu' },
+        ...(location.pathname !== '/login'    ? [{ to: '/login',    label: 'Login'    }] : []),
+        ...(location.pathname !== '/register' ? [{ to: '/register', label: 'Register' }] : []),
+      ];
 
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
@@ -94,7 +98,9 @@ const Navbar = () => {
                 </AnimatePresence>
               </div>
             ) : (
-              <Link to="/login" className="btn-primary text-sm">Login</Link>
+              location.pathname !== '/login' && (
+                <Link to="/login" className="btn-primary text-sm">Login</Link>
+              )
             )}
 
             {/* Mobile menu button */}
