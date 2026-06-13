@@ -12,6 +12,11 @@ exports.getCart = async (req, res, next) => {
 exports.addToCart = async (req, res, next) => {
   try {
     const { pizzaId, isCustom, customDetails, name, image, price, quantity = 1 } = req.body;
+
+    if (!price) {
+      return res.status(400).json({ success: false, message: 'Price is required.' });
+    }
+
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) cart = new Cart({ user: req.user._id, items: [] });
 
@@ -27,7 +32,9 @@ exports.addToCart = async (req, res, next) => {
     }
 
     await cart.save();
-    res.json({ success: true, cart });
+    // Re-fetch with populated pizzaId so frontend gets full data
+    const populated = await Cart.findById(cart._id);
+    res.json({ success: true, cart: populated });
   } catch (err) { next(err); }
 };
 

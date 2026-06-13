@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../store/slices/cartSlice';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const categoryBadge = (cat) => {
   if (cat === 'veg') return <span className="badge-veg">🟢 Veg</span>;
@@ -15,16 +15,19 @@ const PizzaCard = ({ pizza }) => {
   const navigate = useNavigate();
   const { token } = useSelector((s) => s.auth);
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.stopPropagation();
     if (!token) { navigate('/login'); return; }
-    dispatch(addToCart({
+    const result = await dispatch(addToCart({
       pizzaId: pizza._id,
       name: pizza.name,
       image: pizza.image,
       price: pizza.basePrice,
       quantity: 1,
     }));
+    if (addToCart.rejected.match(result)) {
+      toast.error(result.payload || 'Failed to add to cart. Please try again.');
+    }
   };
 
   return (

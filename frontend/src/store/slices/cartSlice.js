@@ -56,6 +56,10 @@ const cartSlice = createSlice({
         setCart(state, action);
         toast.success('Added to cart! 🍕');
       })
+      .addCase(addToCart.rejected, (state, action) => {
+        state.loading = false;
+        toast.error(action.payload || 'Failed to add to cart.');
+      })
       .addCase(updateCartItem.fulfilled, setCart)
       .addCase(removeFromCart.fulfilled, (state, action) => {
         setCart(state, action);
