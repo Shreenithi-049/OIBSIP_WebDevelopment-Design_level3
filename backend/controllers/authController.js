@@ -48,8 +48,8 @@ exports.register = async (req, res, next) => {
     });
 
     // Verification URL
-    const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
-
+    const verifyUrl =
+  `${process.env.BACKEND_URL}/api/auth/verify-email/${verificationToken}`;
     // Send verification email
     try {
       await sendEmail({
